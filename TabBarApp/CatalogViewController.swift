@@ -14,7 +14,7 @@ class CatalogViewController: UIViewController {
     var loadLinkStr = "https://autospot.ru/brands/"
     let rootLinkStr = "https://autospot.ru/brands/"
     private var webView = WKWebView()
-    
+    var isOffer = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,9 +40,14 @@ class CatalogViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        guard let navigationCtrl = self.navigationController else { return }
-        navigationCtrl.navigationItem.backBarButtonItem?.tintColor = #colorLiteral(red: 0.2033973932, green: 0.7708666921, blue: 0.6697602868, alpha: 1)
-        navigationCtrl.navigationItem.leftBarButtonItem?.tintColor = #colorLiteral(red: 0.2033973932, green: 0.7708666921, blue: 0.6697602868, alpha: 1)
+        if self.isOffer {
+            let saveButton = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveOffer))
+            self.navigationItem.setRightBarButtonItems([saveButton], animated: true)
+        }
+    }
+    
+   @objc func saveOffer() {
+        print(self.currentLinkStr)
     }
 }
 
@@ -65,6 +70,7 @@ extension CatalogViewController: WKNavigationDelegate {
             let ctrl = CatalogViewController.init()
             ctrl.currentLinkStr = linkStr
             ctrl.loadLinkStr = linkStr
+            ctrl.isOffer = linkStr.contains("/offer/")
             guard let navCntr = self.navigationController else { return }
             navCntr.pushViewController(ctrl, animated: true)
             return
