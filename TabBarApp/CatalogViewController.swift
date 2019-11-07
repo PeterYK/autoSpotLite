@@ -9,8 +9,10 @@
 import UIKit
 import WebKit
 
-class ViewController: UIViewController {
-var currentLinkStr = "https://autospot.ru/brands/"
+class CatalogViewController: UIViewController {
+    var currentLinkStr = ""
+    var loadLinkStr = "https://autospot.ru/brands/"
+    let rootLinkStr = "https://autospot.ru/brands/"
     private var webView = WKWebView()
     
     
@@ -33,7 +35,7 @@ var currentLinkStr = "https://autospot.ru/brands/"
     }
     
     private func loadUrl() {
-        guard let url = URL( string: self.currentLinkStr) else { return }
+        guard let url = URL( string: self.loadLinkStr) else { return }
         self.webView.load(URLRequest(url: url))
     }
     
@@ -44,21 +46,34 @@ var currentLinkStr = "https://autospot.ru/brands/"
     }
 }
 
-extension ViewController: WKNavigationDelegate {
+extension CatalogViewController: WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let linkStr = navigationAction.request.url?.absoluteString else { decisionHandler(.cancel); return }
-        if linkStr == self.currentLinkStr {
-            decisionHandler(.allow); return
-        } else if linkStr.contains("autospot.ru/brands/"){
+        if linkStr.contains("#") {
             decisionHandler(.cancel)
-            let ctrl = ViewController.init()
+            return
+        } else if linkStr == self.rootLinkStr && linkStr != self.currentLinkStr {
+            self.currentLinkStr = linkStr
+            decisionHandler(.allow)
+            return
+        } else if linkStr.contains("autospot.ru/brands/") && linkStr != self.currentLinkStr {
+            decisionHandler(.cancel)
+            let ctrl = CatalogViewController.init()
             ctrl.currentLinkStr = linkStr
+            ctrl.loadLinkStr = linkStr
             guard let navCntr = self.navigationController else { return }
             navCntr.pushViewController(ctrl, animated: true)
+            return
+        } else if linkStr.contains("autospot.ru/brands/") && linkStr == self.currentLinkStr {
+            decisionHandler(.allow)
+//            let ctrl = CatalogViewController.init()
+//            ctrl.currentLinkStr = linkStr
+//            guard let navCntr = self.navigationController else { return }
+//            navCntr.pushViewController(ctrl, animated: true)
             return
         } else if linkStr.contains("tel:") {
             decisionHandler(.allow); return
